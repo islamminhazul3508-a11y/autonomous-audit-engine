@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Telemetry SaaS Engine</title>
+    <style>
+        :root {
+            --bg: #0b0f19;
+            --surface: #111827;
+            --border: #1f2937;
+            --primary: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --text: #f9fafb;
+            --muted: #9ca3af;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: var(--bg); color: var(--text); padding: 16px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 600px; }
+        .header { text-align: center; margin-bottom: 24px; margin-top: 10px; }
+        .badge { background: rgba(59, 130, 246, 0.2); color: var(--primary); padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: bold; }
+        h1 { font-size: 22px; margin-top: 10px; }
+        p.subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 18px; }
+        label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+        input { width: 100%; padding: 10px 12px; background: #0b0f19; border: 1px solid var(--border); border-radius: 8px; color: #fff; margin-bottom: 14px; font-size: 14px; outline: none; }
+        input:focus { border-color: var(--primary); }
+        button { width: 100%; padding: 12px; background: var(--primary); border: none; border-radius: 8px; color: #fff; font-weight: bold; font-size: 15px; cursor: pointer; }
+        button:disabled { opacity: 0.6; }
+        .result-panel { display: none; }
+        .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+        .metric-box { background: #0b0f19; border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; }
+        .metric-title { font-size: 11px; color: var(--muted); }
+        .metric-val { font-size: 16px; font-weight: bold; margin-top: 4px; }
+        .table-wrap { overflow-x: auto; margin-top: 14px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { padding: 8px 10px; border: 1px solid var(--border); text-align: left; }
+        th { background: #0b0f19; color: var(--muted); }
+        .sec-secured { color: var(--success); font-weight: bold; }
+        .sec-missing { color: var(--danger); font-weight: bold; }
+        .pitch-box { background: rgba(16, 185, 129, 0.08); border: 1px solid var(--success); border-radius: 8px; padding: 12px; margin-top: 14px; font-size: 12px; white-space: pre-wrap; font-family: monospace; color: #d1fae5; }
+        .quota-banner { background: #1e293b; border-left: 4px solid var(--primary); padding: 10px; border-radius: 6px; margin-bottom: 14px; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <span class="badge">SaaS Telemetry Core</span>
+            <h1>Autonomous Website Audit</h1>
+            <p class="subtitle">Passive enterprise intelligence for security & performance</p>
+        </div>
+
+        <div class="quota-banner" id="quotaBanner">
+            Logged in as: <b>agency_owner@test.com</b><br>
+            Plan: <span style="color: #60a5fa; font-weight: bold;" id="currentTier">Starter</span> | 
+            Quota: <span style="color: #34d399; font-weight: bold;" id="currentQuota">Tracking...</span>
+        </div>
+
+        <div class="card">
+            <label>Target Domain / URL</label>
+            <input type="text" id="targetUrl" placeholder="e.g. stripe.com or example.com" value="example.com">
+
+            <label>Agency White-Label Name</label>
+            <input type="text" id="agencyName" value="Apex Security Agency">
+
+            <button id="runBtn" onclick="executeAudit()">Run 5-Second Audit</button>
+        </div>
+
+        <div class="card result-panel" id="resultPanel">
+            <div id="brandingHeader" style="font-weight: bold; color: var(--primary); font-size: 13px;"></div>
+            <div class="metric-grid">
+                <div class="metric-box">
+                    <div class="metric-title">RESPONSE LATENCY</div>
+                    <div class="metric-val" id="latencyVal">-- ms</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-title">SSL STATUS</div>
+                    <div class="metric-val" id="sslVal" style="color: var(--success);">VALID</div>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Defensive Header</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="headersTbody"></tbody>
+                </table>
+            </div>
+
+            <div id="pitchWrapper" style="display: none;">
+                <div style="font-size: 12px; font-weight: bold; color: var(--success); margin-top: 16px;">🔥 Automated Client Outbound Pitch</div>
+                <div class="pitch-box" id="pitchContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function executeAudit() {
+            const btn = document.getElementById("runBtn");
+            const panel = document.getElementById("resultPanel");
+            const target = document.getElementById("targetUrl").value.trim();
+            const agency = document.getElementById("agencyName").value.trim();
+
+            if (!target) return alert("Please enter a target domain");
+
+            btn.disabled = true;
+            btn.innerText = "Analyzing Telemetry...";
+
+            try {
+                const res = await fetch("/api/v1/audit", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        target: target,
+                        user_email: "agency_owner@test.com",
+                        agency_name: agency,
+                        contact_email: "hello@" + agency.toLowerCase().replace(/\s+/g, '') + ".com"
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Scan failed");
+
+                // Update quota banner
+                if (data.quota) {
+                    document.getElementById("currentTier").innerText = data.quota.tier.toUpperCase();
+                    document.getElementById("currentQuota").innerText = `${data.quota.scans_used} / ${data.quota.limit} used`;
+                }
+
+                panel.style.display = "block";
+                document.getElementById("brandingHeader").innerText = data.branding;
+                document.getElementById("latencyVal").innerText = data.data.latency_ms + " ms";
+                document.getElementById("sslVal").innerText = data.data.ssl.status;
+
+                const tbody = document.getElementById("headersTbody");
+                tbody.innerHTML = "";
+                for (const [header, val] of Object.entries(data.data.security_headers)) {
+                    const tr = document.createElement("tr");
+                    const stClass = val.status === "SECURED" ? "sec-secured" : "sec-missing";
+                    tr.innerHTML = `<td><code>${header}</code></td><td class="${stClass}">${val.status}</td>`;
+                    tbody.appendChild(tr);
+                }
+
+                const pitchWrap = document.getElementById("pitchWrapper");
+                if (data.client_pitch) {
+                    pitchWrap.style.display = "block";
+                    document.getElementById("pitchContent").innerText = data.client_pitch;
+                } else {
+                    pitchWrap.style.display = "none";
+                }
+
+            } catch (err) {
+                alert("Audit Error: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Run 5-Second Audit";
+            }
+        }
+    </script>
+</body>
+</html>
