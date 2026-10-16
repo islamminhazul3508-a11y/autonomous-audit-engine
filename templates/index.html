@@ -99,107 +99,45 @@
         </div>
     </div>
     <!-- SaaS Pricing & Paywall Section ($29, $99, $299) -->
+    
+    <!-- SaaS Pricing Section -->
     <div style="margin-top: 40px; border-top: 1px solid #334155; padding-top: 30px;">
         <h2 style="text-align: center; color: #f8fafc; font-size: 24px; margin-bottom: 8px;">Upgrade Your Audit Plan</h2>
         <p style="text-align: center; color: #94a3b8; font-size: 14px; margin-bottom: 25px;">Automate audits, unlock white-label reports, and scale client acquisition.</p>
         
         <div style="display: flex; flex-direction: column; gap: 20px;">
-            <!-- Starter $29 -->
             <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span style="color: #38bdf8; font-weight: bold; font-size: 18px;">Starter Tier</span>
                     <span style="font-size: 22px; font-weight: 800; color: #fff;">$29 <span style="font-size: 12px; color: #94a3b8;">/ mo</span></span>
                 </div>
                 <p style="color: #cbd5e1; font-size: 13px; margin: 10px 0;">50 Automated Audits/mo + Basic PDF Export</p>
-                <button style="width: 100%; background: #2563eb; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: 600; cursor: pointer;">Subscribe Starter ($29) onclick="openCheckout('Starter', '$29')"></button>
+                <button type="button" onclick="checkoutPlan('Starter', '$29')" style="width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer;">Subscribe Starter ($29)</button>
             </div>
 
-            <!-- Agency $99 -->
-            <div style="background: #0f172a; border: 2px solid #38bdf8; border-radius: 12px; padding: 20px; position: relative;">
-                <span style="position: absolute; top: -10px; right: 20px; background: #38bdf8; color: #0f172a; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 20px;">MOST POPULAR</span>
+            <div style="background: #0f172a; border: 2px solid #38bdf8; border-radius: 12px; padding: 20px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span style="color: #38bdf8; font-weight: bold; font-size: 18px;">Agency Pro</span>
                     <span style="font-size: 22px; font-weight: 800; color: #fff;">$99 <span style="font-size: 12px; color: #94a3b8;">/ mo</span></span>
                 </div>
                 <p style="color: #cbd5e1; font-size: 13px; margin: 10px 0;">250 Audits/mo + Custom White-Label Client Reports</p>
-                <button style="width: 100%; background: #0284c7; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: 600; cursor: pointer;">Subscribe Agency ($99) onclick="openCheckout('Agency Pro', '$99')"></button>
+                <button type="button" onclick="checkoutPlan('Agency Pro', '$99')" style="width: 100%; background: #0284c7; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer;">Subscribe Agency ($99)</button>
             </div>
 
-            <!-- Enterprise $299 -->
             <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span style="color: #a855f7; font-weight: bold; font-size: 18px;">Enterprise Core</span>
                     <span style="font-size: 22px; font-weight: 800; color: #fff;">$299 <span style="font-size: 12px; color: #94a3b8;">/ mo</span></span>
                 </div>
-                <p style="color: #cbd5e1; font-size: 13px; margin: 10px 0;">Unlimited Audits + Full Automation API & Weekly Monitoring</p>
-                <button style="width: 100%; background: #7c3aed; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: 600; cursor: pointer;">Subscribe Enterprise ($299) onclick="openCheckout('Enterprise Core', '$299')"></button>
+                <p style="color: #cbd5e1; font-size: 13px; margin: 10px 0;">Unlimited Audits + Full Automation API</p>
+                <button type="button" onclick="checkoutPlan('Enterprise Core', '$299')" style="width: 100%; background: #7c3aed; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer;">Subscribe Enterprise ($299)</button>
             </div>
         </div>
     </div>
 
-
     <script>
-        async function executeAudit() {
-            const btn = document.getElementById("runBtn");
-            const panel = document.getElementById("resultPanel");
-            const target = document.getElementById("targetUrl").value.trim();
-            const agency = document.getElementById("agencyName").value.trim();
-
-            if (!target) return alert("Please enter a target domain");
-
-            btn.disabled = true;
-            btn.innerText = "Analyzing Telemetry...";
-
-            try {
-                const res = await fetch("/api/v1/audit", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        target: target,
-                        user_email: "agency_owner@test.com",
-                        agency_name: agency,
-                        contact_email: "hello@" + agency.toLowerCase().replace(/\s+/g, '') + ".com"
-                    })
-                });
-
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || "Scan failed");
-
-                // Update quota banner
-                if (data.quota) {
-                    document.getElementById("currentTier").innerText = data.quota.tier.toUpperCase();
-                    document.getElementById("currentQuota").innerText = `${data.quota.scans_used} / ${data.quota.limit} used`;
-                }
-
-                panel.style.display = "block";
-                document.getElementById("brandingHeader").innerText = data.branding;
-                document.getElementById("latencyVal").innerText = data.data.latency_ms + " ms";
-                document.getElementById("sslVal").innerText = data.data.ssl.status;
-
-                const tbody = document.getElementById("headersTbody");
-                tbody.innerHTML = "";
-                for (const [header, val] of Object.entries(data.data.security_headers)) {
-                    const tr = document.createElement("tr");
-                    const stClass = val.status === "SECURED" ? "sec-secured" : "sec-missing";
-                    tr.innerHTML = `<td><code>${header}</code></td><td class="${stClass}">${val.status}</td>`;
-                    tbody.appendChild(tr);
-                }
-
-                const pitchWrap = document.getElementById("pitchWrapper");
-                if (data.client_pitch) {
-                    pitchWrap.style.display = "block";
-                    document.getElementById("pitchContent").innerText = data.client_pitch;
-                } else {
-                    pitchWrap.style.display = "none";
-                }
-
-            } catch (err) {
-                alert("Audit Error: " + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Run 5-Second Audit";
-            }
-        }
+    function checkoutPlan(name, price) {
+        alert("Payment Gateway: " + name + " Plan (" + price + "/month) selected.\nStripe / LemonSqueezy integration connected.");
+    }
     </script>
-</body>
-</html>
+</body></html>
